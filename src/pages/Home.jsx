@@ -67,7 +67,7 @@ const Home = () => {
       {/* Trending Section */}
       <section className="mb-12">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">
-          🔥 Trending This Week
+           Trending This Week
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {trending.map((movie) => (
@@ -79,7 +79,7 @@ const Home = () => {
       {/* Popular Section */}
       <section>
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">
-          ⭐ Most Popular
+           Most Popular
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {popular.map((movie) => (

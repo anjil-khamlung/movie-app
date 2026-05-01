@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PiMagnifyingGlass } from "react-icons/pi";
+import Mlogo from "../assets/Mlogo.png"
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,11 +20,12 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Logo */}
-          <Link
-            to="/"
-            className="text-2xl font-bold text-white hover:text-purple-300 transition"
-          >
-            🎬 MovieHub
+          <Link to="/">
+            <img
+              src={Mlogo}
+              alt="MovieHub logo"
+              className="h-10 auto rounded-lg"
+            />
           </Link>
 
           {/* Navigation Links */}
@@ -32,37 +34,47 @@ const Navbar = () => {
               Home
             </Link>
             <Link to="/popular" className="hover:text-purple-300 transition">
-              Popular
+              Genres
             </Link>
             <Link to="/top-rated" className="hover:text-purple-300 transition">
-              Top Rated
+              Country
             </Link>
             <Link
               to="/now-playing"
               className="hover:text-purple-300 transition"
             >
-              Now Playing
+              Movies
+            </Link>
+            <Link to="/top-rated" className="hover:text-purple-300 transition">
+              TV-Series
+            </Link>
+            <Link
+              to="/now-playing"
+              className="hover:text-purple-300 transition"
+            >
+              Top IMDb
             </Link>
           </div>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative">
+            <div className="relative w-full md:w-64">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search movies..."
-                className="px-4 py-2 pr-10 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-64"
+                className="w-full px-4 py-2 pr-12 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <PiMagnifyingGlass className="h-5 w-5 absolute right-3 top-2.5 text-gray-400" />
+
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-white transition"
+              >
+                <PiMagnifyingGlass className="h-5 w-5 cursor-pointer" />
+              </button>
             </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-            >
-              Search
-            </button>
           </form>
         </div>
       </div>
