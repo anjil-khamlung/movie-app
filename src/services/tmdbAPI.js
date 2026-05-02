@@ -59,14 +59,11 @@ const tmdbAPI = {
 
   //Get popular movies
   getPopular: async (page = 1) => {
-    try {
-      const response = await tmdbApi.get("/movie/popular", {
-        params: { page },
-      });
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
+    const res = await tmdbApi.get("/movie/popular", {
+      params: { page },
+    });
+
+    return res.data; // keep full response for pagination
   },
 
   //Get top rated movies
@@ -112,6 +109,40 @@ const tmdbAPI = {
       handleApiError(error);
     }
   },
+
+  //get similar movies
+  getSimilarMovies: async (id) => {
+    try {
+      const res = await tmdbApi.get(`/movie/${id}/similar`);
+      return res.data.results;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  },
+
+  //get popular tvseries
+  getPopularTV: async () => {
+    try {
+      const res = await tmdbApi.get("/tv/popular");
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  },
+
+  //get similar Tv-series
+  getSimilarTV: async (id) => {
+    try {
+      const res = await tmdbApi.get(`/tv/${id}/similar`);
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      return { results: [] };
+    }
+  },
 };
+
 
 export default tmdbAPI;
