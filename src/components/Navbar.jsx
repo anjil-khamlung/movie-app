@@ -33,25 +33,22 @@ const Navbar = () => {
             <Link to="/" className="hover:text-purple-300 transition">
               Home
             </Link>
-            <Link to="/popular" className="hover:text-purple-300 transition">
+            <Link to="/" className="hover:text-purple-300 transition">
               Genres
             </Link>
-            <Link to="/top-rated" className="hover:text-purple-300 transition">
+            <Link to="" className="hover:text-purple-300 transition">
               Country
             </Link>
             <Link
-              to="/now-playing"
+              to="/movies"
               className="hover:text-purple-300 transition"
             >
               Movies
             </Link>
-            <Link to="/top-rated" className="hover:text-purple-300 transition">
+            <Link to="/tv" className="hover:text-purple-300 transition">
               TV-Series
             </Link>
-            <Link
-              to="/now-playing"
-              className="hover:text-purple-300 transition"
-            >
+            <Link to="/top" className="hover:text-purple-300 transition">
               Top IMDb
             </Link>
           </div>

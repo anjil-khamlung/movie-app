@@ -18,7 +18,7 @@ const MovieCard = ({ movie }) => {
           <img
             src={posterUrl}
             alt={movie.title}
-            className="w-full h-96 object-cover"
+            className="w-full h-70 object-cover"
           />
 
           {/* Dark Overlay */}
@@ -27,6 +27,12 @@ const MovieCard = ({ movie }) => {
           {/* Play Icon */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300  ">
             <FaPlayCircle className="text-white text-4xl" />
+          </div>
+          {/* Title Overlay */}
+          <div className="absolute bottom-0 left-0 w-full bg-linear-to-t from-black/80 to-transparent p-2">
+            <p className="text-white text-base font-semibold text-center">
+              {movie.title || movie.name || "No Title"}
+            </p>
           </div>
         </div>
       </div>

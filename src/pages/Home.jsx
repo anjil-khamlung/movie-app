@@ -5,6 +5,7 @@ import tmdbAPI from "../services/tmdbAPI";
 const Home = () => {
   const [trending, setTrending] = useState([]);
   const [popular, setPopular] = useState([]);
+  const [tvSeries, setTvSeries]=useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,13 +13,15 @@ const Home = () => {
     const fetchMovies = async () => {
       try {
         setLoading(true);
-        const [trendingData, popularData] = await Promise.all([
+        const [trendingData, popularData, tvSeriesData] = await Promise.all([
           tmdbAPI.getTrending(),
           tmdbAPI.getPopular(),
+          tmdbAPI.getPopularTV(),
         ]);
 
-        setTrending(trendingData.results.slice(0, 10));
-        setPopular(popularData.results.slice(0, 10));
+        setTrending(trendingData.results.slice(0, 12));
+        setPopular(popularData.results.slice(0, 12));
+        setTvSeries(tvSeriesData.results.slice(0, 12));
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -53,9 +56,9 @@ const Home = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="ml-25 mr-25 mx-auto px-4 py-8 ">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-800 to-indigo-800 rounded-2xl p-8 mb-12 text-white">
+      <div className="bg-linear-to-r from-purple-800 to-indigo-800 rounded-2xl p-8 mb-12 text-white">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Welcome to MovieHub
         </h1>
@@ -66,10 +69,10 @@ const Home = () => {
 
       {/* Trending Section */}
       <section className="mb-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">
-           Trending This Week
+        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+          TRENDING THIS WEEK
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {trending.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}
@@ -77,12 +80,24 @@ const Home = () => {
       </section>
 
       {/* Popular Section */}
-      <section>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">
-           Most Popular
+      <section className="mb-12">
+        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+          MOST POPULAR
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {popular.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
+          ))}
+        </div>
+      </section>
+
+      {/* Popular TvSeries */}
+      <section>
+        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+      POPULAR TV-SERIES
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {tvSeries.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
