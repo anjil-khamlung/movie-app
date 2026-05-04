@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import MovieCard from "../components/MovieCard";
 import tmdbAPI from "../services/tmdbAPI";
+import { useParams } from "react-router-dom";
+import { FaStar } from "react-icons/fa6";
 
 const Home = () => {
   const [trending, setTrending] = useState([]);
@@ -8,12 +10,14 @@ const Home = () => {
   const [tvSeries, setTvSeries]=useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
         setLoading(true);
-        const [trendingData, popularData, tvSeriesData] = await Promise.all([
+        const [trendingData, popularData, tvSeriesData ] = await Promise.all([
           tmdbAPI.getTrending(),
           tmdbAPI.getPopular(),
           tmdbAPI.getPopularTV(),
@@ -22,6 +26,7 @@ const Home = () => {
         setTrending(trendingData.results.slice(0, 12));
         setPopular(popularData.results.slice(0, 12));
         setTvSeries(tvSeriesData.results.slice(0, 12));
+        setMovies(trendingData.results.slice(0,5));
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -32,7 +37,16 @@ const Home = () => {
     };
 
     fetchMovies();
+
+      const interval = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % movies.length);
+      }, 4000);
+
+      return () => clearInterval(interval);
+
   }, []);
+
+
 
   if (loading) {
     return (
@@ -56,53 +70,107 @@ const Home = () => {
   }
 
   return (
-    <div className="ml-25 mr-25 mx-auto px-4 py-8 ">
+    <>
       {/* Hero Section */}
-      <div className="bg-linear-to-r from-purple-800 to-indigo-800 rounded-2xl p-8 mb-12 text-white">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          Welcome to MovieHub
-        </h1>
-        <p className="text-lg md:text-xl opacity-90">
-          Discover the best movies, trending now, and all-time classics
-        </p>
+      <div className="relative h-[50vh] md:h-[60vh]  overflow-hidden mb-12">
+        {/* Slides */}
+        {movies.map((movie, index) => (
+          <div
+            key={movie.id}
+            className={`absolute inset-0 transition-opacity duration-700 ${
+              index === current ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/50"></div>
+
+            {/* Text */}
+            <div className="ml-20 absolute bottom-20 left-10 right-10 text-white max-w-xl">
+              {/* Title */}
+              <h2 className="text-2xl md:text-4xl font-bold mb-2">
+                {movie.title || movie.name}
+              </h2>
+
+              {/* Meta info */}
+              <div className="flex items-center gap-4 text-sm md:text-base mb-2">
+                {/* Rating */}
+                <span className="text-yellow-400 font-semibold flex items-center gap-1">
+                  <FaStar className="text-yellow-400" />
+                  {movie.vote_average?.toFixed(1) || "N/A"}
+                </span>
+
+                {/* Quality */}
+                <span className="bg-purple-600 px-2 py-0.5 rounded text-xs">
+                  HD
+                </span>
+              </div>
+
+              {/* Description */}
+              <p className="text-gray-300 text-sm md:text-base line-clamp-3">
+                {movie.overview || "No description available."}
+              </p>
+
+            </div>
+          </div>
+        ))}
+
+        {/* Dots */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+          {movies.map((_, index) => (
+            <div
+              key={index}
+              onClick={() => setCurrent(index)}
+              className={`h-2 w-6 rounded-full cursor-pointer transition ${
+                current === index ? "bg-white" : "bg-gray-500"
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Trending Section */}
-      <section className="mb-12">
-        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
-          TRENDING THIS WEEK
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {trending.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
+      <div className="ml-25 mr-25 mx-auto px-4 py-8 ">
+        {/* Trending Section */}
+        <section className="mb-12">
+          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+            TRENDING THIS WEEK
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {trending.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
 
-      {/* Popular Section */}
-      <section className="mb-12">
-        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
-          MOST POPULAR
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {popular.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
+        {/* Popular Section */}
+        <section className="mb-12">
+          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+            MOST POPULAR
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {popular.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
 
-      {/* Popular TvSeries */}
-      <section>
-        <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
-      POPULAR TV-SERIES
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {tvSeries.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
-    </div>
+        {/* Popular TvSeries */}
+        <section>
+          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+            POPULAR TV-SERIES
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {tvSeries.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
+      </div>
+    </>
   );
 };
 
