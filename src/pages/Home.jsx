@@ -38,15 +38,17 @@ const Home = () => {
 
     fetchMovies();
 
-      const interval = setInterval(() => {
-        setCurrent((prev) => (prev + 1) % movies.length);
-      }, 4000);
-
-      return () => clearInterval(interval);
-
   }, []);
 
+useEffect(() => {
+  if (!movies.length) return; 
 
+  const interval = setInterval(() => {
+    setCurrent((prev) => (prev + 1) % movies.length);
+  }, 4000);
+
+  return () => clearInterval(interval);
+}, [movies]);
 
   if (loading) {
     return (
@@ -72,7 +74,7 @@ const Home = () => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative h-[50vh] md:h-[60vh]  overflow-hidden mb-12">
+      <div className="relative h-[50vh] md:h-[60vh]  overflow-hidden mb-5">
         {/* Slides */}
         {movies.map((movie, index) => (
           <div
@@ -114,7 +116,6 @@ const Home = () => {
               <p className="text-gray-300 text-sm md:text-base line-clamp-3">
                 {movie.overview || "No description available."}
               </p>
-
             </div>
           </div>
         ))}
@@ -133,9 +134,10 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="ml-25 mr-25 mx-auto px-4 py-8 ">
+      {/* Body */}
+      <div className="max-w-7xl mx-auto">
         {/* Trending Section */}
-        <section className="mb-12">
+        <section className="mb-5">
           <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
             TRENDING THIS WEEK
           </h2>
@@ -147,7 +149,7 @@ const Home = () => {
         </section>
 
         {/* Popular Section */}
-        <section className="mb-12">
+        <section className="mb-5">
           <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
             MOST POPULAR
           </h2>

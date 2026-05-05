@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PiMagnifyingGlass } from "react-icons/pi";
 import Mlogo from "../assets/Mlogo.png"
+import tmdbAPI from "../services/tmdbAPI";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showGenres, setShowGenres] = useState(false);
+  const [genres, setGenres] = useState([]);
   const navigate = useNavigate();
 
+  const dropdownRef = useRef(null);
+  const openGenres = () => setShowGenres(true);
+  const closeGenres = () => setShowGenres(false);
+  
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -14,6 +21,31 @@ const Navbar = () => {
       setSearchQuery("");
     }
   };
+
+  //  data
+  useEffect(() => {
+    const fetchGenres = async () => {
+      const data = await tmdbAPI.getGenres();
+      setGenres(data.genres);
+    };
+
+    fetchGenres();
+  }, []);
+
+  //  UI behavior
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setShowGenres(false);
+    }
+  };
+
+  document.addEventListener("pointerdown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("pointerdown", handleClickOutside);
+  };
+}, []);
 
   return (
     <nav className="bg-linear-to-r from-purple-900 to-indigo-900 shadow-lg sticky top-0 z-50">
@@ -33,16 +65,39 @@ const Navbar = () => {
             <Link to="/" className="hover:text-purple-300 transition">
               Home
             </Link>
-            <Link to="/" className="hover:text-purple-300 transition">
-              Genres
-            </Link>
-            <Link to="" className="hover:text-purple-300 transition">
-              Country
-            </Link>
-            <Link
-              to="/movies"
-              className="hover:text-purple-300 transition"
-            >
+
+            <div className="relative">
+              <button
+                onClick={openGenres}
+                className="hover:text-purple-300 transition cursor-pointer"
+              >
+                Genres
+              </button>
+
+              {/* genre dropdown */}
+              {showGenres && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute top-10 left-0 bg-gray-800 text-white rounded-lg shadow-lg p-4 grid grid-cols-3 gap-3 w-100 z-50"
+                >
+                  {genres.map((genre) => (
+                    <div
+                      key={genre.id}
+                      className="cursor-pointer hover:text-purple-400 transition"
+                      onClick={() => {
+                        setShowGenres(false);
+
+                        navigate(`/genre/${genre.id}`);
+                      }}
+                    >
+                      {genre.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link to="/movies" className="hover:text-purple-300 transition">
               Movies
             </Link>
             <Link to="/tv" className="hover:text-purple-300 transition">

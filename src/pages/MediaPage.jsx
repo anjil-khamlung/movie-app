@@ -8,9 +8,13 @@ const MediaPage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [data, setData] = useState([]);
-  const { type } = useParams();
+  const [genres, setGenres] = useState([]);
+  const { type, genreId } = useParams();
 
   const getData = async (page) => {
+      if (genreId) {
+        return await tmdbAPI.getMoviesByGenre(genreId, page);
+      }
     switch (type) {
       case "movies":
         return await tmdbAPI.getPopular(page);
@@ -26,6 +30,9 @@ const MediaPage = () => {
     }
   };
 
+  const genreName = genres.find((g) => g.id === Number(genreId))?.name;
+  const toUpper = (str) => str?.toUpperCase();
+  
   useEffect(() => {
     const fetchData = async () => {
       const res = await getData(page);
@@ -35,14 +42,33 @@ const MediaPage = () => {
     };
 
     fetchData();
-  }, [page, type]);
+  }, [page, type, genreId]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [genreId, type]);
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      const data = await tmdbAPI.getGenres();
+      setGenres(data.genres);
+    };
+
+    fetchGenres();
+  }, []);
 
   return (
     <div className="ml-25 mr-25 mx-auto px-4 py-8">
-      <h2 className="text-2xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
-        {type === "movies" && "WATCH MOVIES"}
-        {type === "tv" && "WATCH TV-SERIES"}
-        {type === "top" && "TOP IMDB "}
+      <h2 className="text-2xl text-white mb-6 border-l-4 border-purple-500 pl-4">
+        {genreId
+          ? `${toUpper(genreName) || "Genre"} MOVIES`
+          : type === "movies"
+            ? "WATCH MOVIES"
+            : type === "tv"
+              ? "WATCH TV-SERIES"
+              : type === "top"
+                ? "TOP IMDB"
+                : ""}
       </h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
