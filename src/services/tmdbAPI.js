@@ -121,6 +121,33 @@ const tmdbAPI = {
     }
   },
 
+  //get genres
+  getGenres: async () => {
+    try {
+      const res = await tmdbApi.get("/genre/movie/list");
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  },
+
+  //get movies by genre id
+  getMoviesByGenre: async (genreId, page = 1) => {
+    try {
+      const res = await tmdbApi.get("/discover/movie", {
+        params: {
+          with_genres: genreId,
+          page,
+        },
+      });
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      return { results: [], total_pages: 1 };
+    }
+  },
+
   //get popular tvseries
   getPopularTV: async () => {
     try {
