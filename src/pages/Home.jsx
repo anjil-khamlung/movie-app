@@ -92,7 +92,7 @@ useEffect(() => {
             <div className="absolute inset-0 bg-black/50"></div>
 
             {/* Text */}
-            <div className="ml-20 absolute bottom-20 left-10 right-10 text-white max-w-xl">
+            <div className="ml-20 absolute bottom-10 left-10 right-10 text-white max-w-xl">
               {/* Title */}
               <h2 className="text-2xl md:text-4xl font-bold mb-2">
                 {movie.title || movie.name}
@@ -113,9 +113,11 @@ useEffect(() => {
               </div>
 
               {/* Description */}
-              <p className="text-gray-300 text-sm md:text-base line-clamp-3">
+              <p className="text-gray-300 text-sm md:text-base line-clamp-3 ">
                 {movie.overview || "No description available."}
               </p>
+
+              <button className="bg-purple-600 px-2 py-1 rounded mt-4 cursor-pointer">Watch Now</button>
             </div>
           </div>
         ))}
