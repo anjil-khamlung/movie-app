@@ -13,9 +13,30 @@ const SearchResults = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
+  
+        const pages = new Set([1]);
+
+        if (page <= 2) {
+          pages.add(2);
+          pages.add(3);
+        } else if (page >= totalPages - 1) {
+          pages.add(totalPages - 2);
+          pages.add(totalPages - 1);
+          pages.add(totalPages);
+        } else {
+          pages.add(page - 1);
+          pages.add(page);
+          pages.add(page + 1);
+        }
+
+        const visiblePages = [...pages]
+          .filter((p) => p > 0 && p <= totalPages)
+          .sort((a, b) => a - b);
+
   useEffect(() => {
     const searchMovies = async () => {
       if (!query) return;
+
 
       try {
         setLoading(true);
@@ -33,6 +54,8 @@ const SearchResults = () => {
 
     searchMovies();
   }, [query, page]);
+
+
 
   // Reset page when query changes
   useEffect(() => {
@@ -53,13 +76,10 @@ const SearchResults = () => {
     <div className=" mx-auto px-4 py-8 ml-25 mr-25">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-2">
-          <PiMagnifyingGlass className="text-purple-500" />
-          Search Results
+        <h1 className="text-2xl md:text-2xl  text-white mb-2 flex items-center gap-2 uppercase">
+          <PiMagnifyingGlass className="text-purple-500 " />
+          Search Results for : {query}
         </h1>
-        <p className="text-gray-400">
-          Found {results.length} results for "{query}"
-        </p>
       </div>
 
       {/* Results Grid */}
@@ -87,28 +107,33 @@ const SearchResults = () => {
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 bg-purple-600 text-white rounded-lg">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition"
-              >
-                Next
-              </button>
+          {/* page numbers */}
+          <div className="flex justify-center items-center  mt-10 text-white">
+            <div className="flex items-center gap-3">
+              {visiblePages.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`px-4 py-2 rounded ${
+                    page === p
+                      ? "bg-purple-600"
+                      : "bg-gray-800 hover:bg-gray-700"
+                  }`}
+                >
+                  {p === 1 && page > 3 ? "First" : p}
+                </button>
+              ))}
+
+              {totalPages > 3 && page !== totalPages && (
+                <button
+                  onClick={() => setPage(totalPages)}
+                  className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+                >
+                  Last
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </>
       )}
     </div>

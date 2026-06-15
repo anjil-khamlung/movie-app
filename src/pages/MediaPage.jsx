@@ -3,6 +3,9 @@ import tmdbAPI from "../services/tmdbAPI";
 import MovieCard from "../components/MovieCard";
 import { useParams } from "react-router-dom";
 
+// TMDB API only allows up to page 500
+const TMDB_MAX_PAGES = 500;
+
 const MediaPage = () => {
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
@@ -11,10 +14,16 @@ const MediaPage = () => {
   const [genres, setGenres] = useState([]);
   const { type, genreId } = useParams();
 
+  // Safe function to set page - prevents going beyond TMDB limit
+  const safeSetPage = (newPage) => {
+    const validPage = Math.min(Math.max(1, newPage), TMDB_MAX_PAGES);
+    setPage(validPage);
+  };
+
   const getData = async (page) => {
-      if (genreId) {
-        return await tmdbAPI.getMoviesByGenre(genreId, page);
-      }
+    if (genreId) {
+      return await tmdbAPI.getMoviesByGenre(genreId, page);
+    }
     switch (type) {
       case "movies":
         return await tmdbAPI.getPopular(page);
@@ -32,20 +41,41 @@ const MediaPage = () => {
 
   const genreName = genres.find((g) => g.id === Number(genreId))?.name;
   const toUpper = (str) => str?.toUpperCase();
-  
+
+  const pages = new Set([1]);
+
+  if (page <= 2) {
+    pages.add(2);
+    pages.add(3);
+  } else if (page >= totalPages - 1) {
+    pages.add(totalPages - 2);
+    pages.add(totalPages - 1);
+    pages.add(totalPages);
+  } else {
+    pages.add(page - 1);
+    pages.add(page);
+    pages.add(page + 1);
+  }
+
+  const visiblePages = [...pages]
+    .filter((p) => p > 0 && p <= totalPages)
+    .sort((a, b) => a - b);
+
   useEffect(() => {
     const fetchData = async () => {
       const res = await getData(page);
 
       setData(res.results);
-      setTotalPages(res.total_pages);
+      // Cap the total pages at TMDB's limit (500)
+      const cappedTotalPages = Math.min(res.total_pages, TMDB_MAX_PAGES);
+      setTotalPages(cappedTotalPages);
     };
 
     fetchData();
   }, [page, type, genreId]);
 
   useEffect(() => {
-    setPage(1);
+    safeSetPage(1); // Use safeSetPage instead of setPage
   }, [genreId, type]);
 
   useEffect(() => {
@@ -77,80 +107,30 @@ const MediaPage = () => {
         ))}
       </div>
 
-      <div className="flex justify-center items-center gap-2 mt-10 text-white">
-        {/* Previous */}
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
-          className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700 disabled:opacity-40"
-        >
-          Prev
-        </button>
-
-        {/* Page numbers */}
-        <div className="flex items-center gap-2">
-          {/* First page */}
-          <button
-            onClick={() => setPage(1)}
-            className={`px-3 py-1 rounded ${
-              page === 1 ? "bg-purple-600" : "bg-gray-800 hover:bg-gray-700"
-            }`}
-          >
-            1
-          </button>
-
-          {/* Ellipsis */}
-          {page > 3 && <span className="px-2">...</span>}
-
-          {/* Current - 1 */}
-          {page > 2 && (
+      {/* page numbers */}
+      <div className="flex justify-center items-center  mt-10 text-white">
+        <div className="flex items-center gap-3">
+          {visiblePages.map((p) => (
             <button
-              onClick={() => setPage(page - 1)}
-              className="px-3 py-1 rounded bg-gray-800 hover:bg-gray-700"
+              key={p}
+              onClick={() => safeSetPage(p)}
+              className={`px-4 py-2 rounded ${
+                page === p ? "bg-purple-600" : "bg-gray-800 hover:bg-gray-700"
+              }`}
             >
-              {page - 1}
+              {p === 1 && page > 3 ? "First" : p}
+            </button>
+          ))}
+
+          {totalPages > 3 && page !== totalPages && (
+            <button
+              onClick={() => safeSetPage(totalPages)}
+              className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+            >
+              Last
             </button>
           )}
-
-          {/* Current page */}
-          {page !== 1 && page !== totalPages && (
-            <button className="px-3 py-1 rounded bg-purple-600">{page}</button>
-          )}
-
-          {/* Current + 1 */}
-          {page < totalPages - 1 && (
-            <button
-              onClick={() => setPage(page + 1)}
-              className="px-3 py-1 rounded bg-gray-800 hover:bg-gray-700"
-            >
-              {page + 1}
-            </button>
-          )}
-
-          {/* Ellipsis */}
-          {page < totalPages - 2 && <span className="px-2">...</span>}
-
-          {/* Last page */}
-          <button
-            onClick={() => setPage(totalPages)}
-            className={`px-3 py-1 rounded ${
-              page === totalPages
-                ? "bg-purple-600"
-                : "bg-gray-800 hover:bg-gray-700"
-            }`}
-          >
-            {totalPages}
-          </button>
         </div>
-
-        {/* Next */}
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage((p) => p + 1)}
-          className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 disabled:opacity-40"
-        >
-          Next
-        </button>
       </div>
     </div>
   );
