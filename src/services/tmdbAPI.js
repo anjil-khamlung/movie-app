@@ -149,9 +149,9 @@ const tmdbAPI = {
   },
 
   //get popular tvseries
-  getPopularTV: async () => {
+  getPopularTV: async (page = 1) => {
     try {
-      const res = await tmdbApi.get("/tv/popular");
+      const res = await tmdbApi.get(`/tv/popular?page=${page}`);
       return res.data;
     } catch (err) {
       console.error(err);

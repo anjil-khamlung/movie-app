@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
 import tmdbAPI from "../services/tmdbAPI";
 import { PiMagnifyingGlass, PiFilmStrip } from "react-icons/pi";
+import GridSkeleton from "../components/skeletons/GridSkeleton";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -41,7 +42,7 @@ const SearchResults = () => {
       try {
         setLoading(true);
         const data = await tmdbAPI.searchMovies(query, page);
-        setResults(data.results || []);
+        setResults((data.results || []).slice(0,18));
         setTotalPages(Math.min(data.total_pages || 0, 500));
         setError(null);
       } catch (err) {
@@ -62,21 +63,13 @@ const SearchResults = () => {
     setPage(1);
   }, [query]);
 
-  if (loading && page === 1) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-        </div>
-      </div>
-    );
-  }
+if (loading) return <GridSkeleton/>
 
   return (
-    <div className=" mx-auto px-4 py-8 ml-25 mr-25">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-2xl  text-white mb-2 flex items-center gap-2 uppercase">
+        <h1 className="text-xl sm:text-2xl md:text-3xl text-white mb-2 flex items-center gap-2 uppercase">
           <PiMagnifyingGlass className="text-purple-500 " />
           Search Results for : {query}
         </h1>
@@ -88,7 +81,7 @@ const SearchResults = () => {
           <p>Error: {error}</p>
         </div>
       ) : results.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-10 sm:py-12 px-4">
           <PiFilmStrip className="text-6xl text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 text-lg">No movies found for "{query}"</p>
           <p className="text-gray-500 mt-2">Try searching for something else</p>
@@ -101,20 +94,20 @@ const SearchResults = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {results.map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>
 
           {/* page numbers */}
-          <div className="flex justify-center items-center  mt-10 text-white">
-            <div className="flex items-center gap-3">
+          <div className="flex justify-center mt-8 sm:mt-10 text-white px-2">
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
               {visiblePages.map((p) => (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-4 py-2 rounded ${
+                  className={`px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded cursor-pointer transition ${
                     page === p
                       ? "bg-purple-600"
                       : "bg-gray-800 hover:bg-gray-700"
@@ -127,7 +120,7 @@ const SearchResults = () => {
               {totalPages > 3 && page !== totalPages && (
                 <button
                   onClick={() => setPage(totalPages)}
-                  className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+                  className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700 cursor-pointer"
                 >
                   Last
                 </button>

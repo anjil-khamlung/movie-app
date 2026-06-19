@@ -11,6 +11,8 @@ import {
 } from "react-icons/fa";
 import { PiFilmStrip, PiUsers, PiFlagBanner } from "react-icons/pi";
 import MovieCard from "../components/MovieCard";
+import MovieDetailsSkeleton from "../components/skeletons/MovieDetailsSkeleton";
+import LoadingSkeleton from "../components/skeletons/LoadingSkeleton";
 
 
 const MovieDetails = () => {
@@ -36,7 +38,7 @@ useEffect(() => {
           },
         }).then((res) => res.json()),
 
-        fetch(`${API_CONFIG.BASE_URL}/movie/${id}/similar`, {
+        fetch(`${API_CONFIG.BASE_URL}/movie/${id}/recommendations`, {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_TOKEN}`,
           },
@@ -56,6 +58,7 @@ useEffect(() => {
   };
 
   fetchMovieDetails();
+
 }, [id]);
 
   // Get main actors (first 3-4)
@@ -87,13 +90,13 @@ useEffect(() => {
     return Math.round(rating * 10);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
+
+  
+  if (loading) return (
+    <LoadingSkeleton>
+      <MovieDetailsSkeleton />
+    </LoadingSkeleton>
+  );
 
   if (error || !movie) {
     return (
@@ -114,11 +117,11 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 ml-40 mr-40 mt-5">
+    <div className="min-h-screen bg-gray-900">
       {/* Hero Section with Background Image */}
       <div className="bg-gray-800 rounded overflow-hidden">
         <div
-          className="relative group h-[50vh] md:h-[60vh] bg-cover bg-center bg-no-repeat cursor-pointer"
+          className="relative group h-[40vh] sm:h-[50vh] md:h-[60vh] bg-cover bg-center cursor-pointer"
           style={{
             backgroundImage: backgroundImage
               ? `url(${backgroundImage})`
@@ -135,10 +138,10 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="container p-5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row gap-6 md:gap-8">
             {/* Movie Poster */}
-            <div className="w-32 md:w-50 shrink-0 mx-auto md:mx-0">
+            <div className="hidden md:block w-36 sm:w-44 md:w-52 lg:w-60 shrink-0">
               <img
                 src={posterUrl}
                 alt={movie.title}
@@ -148,16 +151,16 @@ useEffect(() => {
 
             {/* Movie Info */}
             <div className="flex-1 text-white ">
-              <h1 className="text-3xl md:text-3xl font-bold mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
                 {movie.title}
               </h1>
 
               {/* Overview */}
-              <p className="text-gray-300  leading-relaxed mb-4 text-sm md:text-base  line-clamp-2">
+              <p className="text-gray-300 leading-relaxed mb-4 text-xs sm:text-sm md:text-base line-clamp-2 md:line-clamp-3">
                 {movie.overview || "No description available."}
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm md:text-base">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-8 gap-y-2 text-xs sm:text-sm md:text-base">
                 {/* LEFT COLUMN */}
                 <div className="space-y-2">
                   {movie.genres?.length > 0 && (
@@ -232,8 +235,8 @@ useEffect(() => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 mt-6">
-                <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 cursor-pointer rounded-lg font-semibold flex items-center gap-2 transition">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-6">
+                <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-6 py-2 text-sm sm:text-base rounded-lg font-semibold flex items-center gap-2 transition cursor-pointer">
                   <FaPlay className="text-sm" /> Stream in HD
                 </button>
                 <button className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg cursor-pointer font-semibold flex items-center gap-2 transition">
@@ -246,11 +249,11 @@ useEffect(() => {
       </div>
 
       {/* Related movies section */}
-      <div className="mt-5">
+      <div className="mt-6 sm:mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
-          RELATED MOVIES
+          YOU MAY ALSO LIKE
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
           {relatedMovies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}

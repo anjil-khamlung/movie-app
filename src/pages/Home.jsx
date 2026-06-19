@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import MovieCard from "../components/MovieCard";
 import tmdbAPI from "../services/tmdbAPI";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaStar } from "react-icons/fa6";
+import GridSkeleton from "../components/skeletons/GridSkeleton";
+import LoadingSkeleton from "../components/skeletons/LoadingSkeleton";
+
+
 
 const Home = () => {
   const [trending, setTrending] = useState([]);
@@ -12,6 +16,7 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [movies, setMovies] = useState([]);
   const [current, setCurrent] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -50,15 +55,11 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [movies]);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <LoadingSkeleton>
+      <GridSkeleton />
+    </LoadingSkeleton>
+  );
 
   if (error) {
     return (
@@ -74,13 +75,16 @@ useEffect(() => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative h-[50vh] md:h-[60vh]  overflow-hidden mb-5">
+      <div className="relative h-[45vh] sm:h-[50vh] md:h-[60vh]  overflow-hidden mb-5">
         {/* Slides */}
         {movies.map((movie, index) => (
           <div
             key={movie.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              index === current ? "opacity-100" : "opacity-0"
+            onClick={() => navigate(`/movie/${movie.id}`)}
+            className={`absolute inset-0 transition-opacity duration-700 cursor-pointer ${
+              index === current
+                ? "opacity-100 z-0"
+                : "opacity-0 z-0 pointer-events-none"
             }`}
             style={{
               backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
@@ -89,17 +93,17 @@ useEffect(() => {
             }}
           >
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-transparent"></div>
 
             {/* Text */}
-            <div className="ml-20 absolute bottom-10 left-10 right-10 text-white max-w-xl">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] sm:w-[80%] lg:w-[40%] text-white">
               {/* Title */}
-              <h2 className="text-2xl md:text-4xl font-bold mb-2">
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2">
                 {movie.title || movie.name}
               </h2>
 
               {/* Meta info */}
-              <div className="flex items-center gap-4 text-sm md:text-base mb-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm md:text-base mb-2">
                 {/* Rating */}
                 <span className="text-yellow-400 font-semibold flex items-center gap-1">
                   <FaStar className="text-yellow-400" />
@@ -113,11 +117,16 @@ useEffect(() => {
               </div>
 
               {/* Description */}
-              <p className="text-gray-300 text-sm md:text-base line-clamp-3 ">
+              <p className="text-gray-300 text-xs sm:text-sm md:text-base line-clamp-2 md:line-clamp-3">
                 {movie.overview || "No description available."}
               </p>
 
-              <button className="bg-purple-600 px-2 py-1 rounded mt-4 cursor-pointer">Watch Now</button>
+              <button
+                onClick={() => navigate(`/movie/${movie.id}`)}
+                className="bg-purple-600 px-4 py-2 rounded mt-4 text-sm sm:text-base cursor-pointer"
+              >
+                Watch Now
+              </button>
             </div>
           </div>
         ))}
@@ -137,10 +146,10 @@ useEffect(() => {
       </div>
 
       {/* Body */}
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Trending Section */}
         <section className="mb-5">
-          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-white mb-6 border-l-4 border-purple-500 pl-4">
             TRENDING THIS WEEK
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -152,7 +161,7 @@ useEffect(() => {
 
         {/* Popular Section */}
         <section className="mb-5">
-          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-white mb-6 border-l-4 border-purple-500 pl-4">
             MOST POPULAR
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -164,7 +173,7 @@ useEffect(() => {
 
         {/* Popular TvSeries */}
         <section>
-          <h2 className="text-2xl md:text-3xl  text-white mb-6 border-l-4 border-purple-500 pl-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-white mb-6 border-l-4 border-purple-500 pl-4">
             POPULAR TV-SERIES
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">

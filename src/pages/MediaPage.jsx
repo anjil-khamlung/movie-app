@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import tmdbAPI from "../services/tmdbAPI";
 import MovieCard from "../components/MovieCard";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import GridSkeleton from "../components/skeletons/GridSkeleton";
 
 // TMDB API only allows up to page 500
 const TMDB_MAX_PAGES = 500;
 
-const MediaPage = () => {
+const MediaPage = ({type}) => {
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [data, setData] = useState([]);
   const [genres, setGenres] = useState([]);
-  const { type, genreId } = useParams();
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+    const { genreId } = useParams();
+  
 
   // Safe function to set page - prevents going beyond TMDB limit
   const safeSetPage = (newPage) => {
@@ -63,20 +67,31 @@ const MediaPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await getData(page);
+      try {
+        setLoading(true); // START LOADING
 
-      setData(res.results);
-      // Cap the total pages at TMDB's limit (500)
-      const cappedTotalPages = Math.min(res.total_pages, TMDB_MAX_PAGES);
-      setTotalPages(cappedTotalPages);
+        const res = await getData(page);
+
+        setData((res.results || []).slice(0, 18));
+
+        const cappedTotalPages = Math.min(res.total_pages, TMDB_MAX_PAGES);
+
+        setTotalPages(cappedTotalPages);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false); // STOP LOADING
+      }
+     console.log("Fetching TV page:", page);
     };
 
     fetchData();
   }, [page, type, genreId]);
 
+  // reset page when route changes
   useEffect(() => {
-    safeSetPage(1); // Use safeSetPage instead of setPage
-  }, [genreId, type]);
+    safeSetPage(1);
+  }, [type,genreId]);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -87,9 +102,11 @@ const MediaPage = () => {
     fetchGenres();
   }, []);
 
+  if (loading) return <GridSkeleton  />;
+
   return (
-    <div className="ml-25 mr-25 mx-auto px-4 py-8">
-      <h2 className="text-2xl text-white mb-6 border-l-4 border-purple-500 pl-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <h2 className="text-xl sm:text-2xl md:text-3xl text-white mb-6 border-l-4 border-purple-500 pl-3 sm:pl-4">
         {genreId
           ? `${toUpper(genreName) || "Genre"} MOVIES`
           : type === "movies"
@@ -101,20 +118,20 @@ const MediaPage = () => {
                 : ""}
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
         {data.map((item) => (
           <MovieCard key={item.id} movie={item} />
         ))}
       </div>
 
       {/* page numbers */}
-      <div className="flex justify-center items-center  mt-10 text-white">
-        <div className="flex items-center gap-3">
+      <div className="flex justify-center mt-8 sm:mt-10 text-white">
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
           {visiblePages.map((p) => (
             <button
               key={p}
               onClick={() => safeSetPage(p)}
-              className={`px-4 py-2 rounded ${
+              className={`px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded cursor-pointer transition ${
                 page === p ? "bg-purple-600" : "bg-gray-800 hover:bg-gray-700"
               }`}
             >
@@ -125,7 +142,7 @@ const MediaPage = () => {
           {totalPages > 3 && page !== totalPages && (
             <button
               onClick={() => safeSetPage(totalPages)}
-              className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700"
+              className="px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded bg-gray-800 hover:bg-gray-700 cursor-pointer"
             >
               Last
             </button>
