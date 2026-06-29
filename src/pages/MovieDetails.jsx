@@ -24,43 +24,6 @@ const MovieDetails = () => {
   const [error, setError] = useState(null);
   const [relatedMovies, setRelatedMovies] = useState([]);
 
-useEffect(() => {
-  const fetchMovieDetails = async () => {
-    try {
-      setLoading(true);
-
-      const [movieData, creditsData, relatedData] = await Promise.all([
-        tmdbAPI.getMovieDetails(id),
-
-        fetch(`${API_CONFIG.BASE_URL}/movie/${id}/credits`, {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_TOKEN}`,
-          },
-        }).then((res) => res.json()),
-
-        fetch(`${API_CONFIG.BASE_URL}/movie/${id}/recommendations`, {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_TOKEN}`,
-          },
-        }).then((res) => res.json()),
-      ]);
-
-      setMovie(movieData);
-      setCredits(creditsData);
-      setRelatedMovies(relatedData.results.slice(0,12)); 
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      console.error("Error fetching movie details:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchMovieDetails();
-
-}, [id]);
-
   // Get main actors (first 3-4)
   const mainActors = credits?.cast?.slice(0, 4) || [];
 
@@ -76,27 +39,66 @@ useEffect(() => {
       ? `${API_CONFIG.IMAGE_BASE_URL}${API_CONFIG.POSTER_SIZE}${movie.poster_path}`
       : null;
 
+  // Generate the movie poster URL or use a placeholder if unavailable
   const posterUrl = movie?.poster_path
     ? `${API_CONFIG.IMAGE_BASE_URL}${API_CONFIG.POSTER_SIZE}${movie.poster_path}`
     : "https://via.placeholder.com/500x750?text=No+Poster";
 
+  // Format movie runtime
   const formatRuntime = (minutes) => {
     if (!minutes) return "N/A";
     return `${minutes} min`;
   };
 
+  // Convert TMDB rating to a percentage
   const getRatingPercentage = (rating) => {
     if (!rating) return "N/A";
     return Math.round(rating * 10);
   };
 
+  // Fetch movie details, cast, and recommendations
+  useEffect(() => {
+    const fetchMovieDetails = async () => {
+      try {
+        setLoading(true);
 
+        const [movieData, creditsData, relatedData] = await Promise.all([
+          tmdbAPI.getMovieDetails(id),
+
+          fetch(`${API_CONFIG.BASE_URL}/movie/${id}/credits`, {
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_TOKEN}`,
+            },
+          }).then((res) => res.json()),
+
+          fetch(`${API_CONFIG.BASE_URL}/movie/${id}/recommendations`, {
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_TOKEN}`,
+            },
+          }).then((res) => res.json()),
+        ]);
+
+        setMovie(movieData);
+        setCredits(creditsData);
+        setRelatedMovies(relatedData.results.slice(0, 12));
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching movie details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovieDetails();
+  }, [id]);
   
-  if (loading) return (
-    <LoadingSkeleton>
-      <MovieDetailsSkeleton />
-    </LoadingSkeleton>
-  );
+  if (loading)
+    return (
+      <LoadingSkeleton>
+        <MovieDetailsSkeleton />
+      </LoadingSkeleton>
+    );
 
   if (error || !movie) {
     return (
@@ -106,8 +108,8 @@ useEffect(() => {
             Error: {error || "Movie not found"}
           </p>
           <button
-            onClick={() => navigate("/")}
-            className="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+            onClick={() => navigate(-1)}
+            className="px-6 py-2 bg-purple-600 rounded-lg cursor-pointer hover:bg-purple-700 transition"
           >
             Go Back Home
           </button>
@@ -261,6 +263,6 @@ useEffect(() => {
       </div>
     </div>
   );
-};
+};;
 
 export default MovieDetails;

@@ -21,7 +21,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <Link to="/">
+            <Link
+              to="/"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
               <img
                 src={Mlogo}
                 alt="MovieHub logo"
@@ -132,7 +135,6 @@ const Footer = () => {
             <div className="flex flex-col gap-2 text-sm">
               <Link
                 to="/privacy"
-                
                 className="text-gray-400 hover:text-purple-400 transition"
               >
                 Privacy Policy
@@ -144,8 +146,6 @@ const Footer = () => {
               >
                 Terms & Conditions
               </Link>
-
-              
             </div>
           </div>
         </div>

@@ -3,26 +3,28 @@ import MovieCard from "../components/MovieCard";
 import tmdbAPI from "../services/tmdbAPI";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaStar } from "react-icons/fa6";
-import GridSkeleton from "../components/skeletons/GridSkeleton";
 import LoadingSkeleton from "../components/skeletons/LoadingSkeleton";
+import HomeSkeleton from "../components/skeletons/HomeSkeleton";
 
 
 
 const Home = () => {
   const [trending, setTrending] = useState([]);
   const [popular, setPopular] = useState([]);
-  const [tvSeries, setTvSeries]=useState([]);
+  const [tvSeries, setTvSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [movies, setMovies] = useState([]);
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
 
+  // Fetch homepage movie and TV data on component mount
   useEffect(() => {
     const fetchMovies = async () => {
       try {
         setLoading(true);
-        const [trendingData, popularData, tvSeriesData ] = await Promise.all([
+
+        const [trendingData, popularData, tvSeriesData] = await Promise.all([
           tmdbAPI.getTrending(),
           tmdbAPI.getPopular(),
           tmdbAPI.getPopularTV(),
@@ -31,7 +33,8 @@ const Home = () => {
         setTrending(trendingData.results.slice(0, 12));
         setPopular(popularData.results.slice(0, 12));
         setTvSeries(tvSeriesData.results.slice(0, 12));
-        setMovies(trendingData.results.slice(0,5));
+        setMovies(trendingData.results.slice(0, 5));
+
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -42,24 +45,25 @@ const Home = () => {
     };
 
     fetchMovies();
-
   }, []);
 
-useEffect(() => {
-  if (!movies.length) return; 
+  // Automatically rotate the hero banner every 4 seconds
+  useEffect(() => {
+    if (!movies.length) return;
 
-  const interval = setInterval(() => {
-    setCurrent((prev) => (prev + 1) % movies.length);
-  }, 4000);
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % movies.length);
+    }, 4000);
 
-  return () => clearInterval(interval);
-}, [movies]);
+    return () => clearInterval(interval);
+  }, [movies]);
 
-  if (loading) return (
-    <LoadingSkeleton>
-      <GridSkeleton />
-    </LoadingSkeleton>
-  );
+  if (loading)
+    return (
+      <LoadingSkeleton>
+        <HomeSkeleton />
+      </LoadingSkeleton>
+    );
 
   if (error) {
     return (
@@ -185,6 +189,6 @@ useEffect(() => {
       </div>
     </>
   );
-};
+};;
 
 export default Home;

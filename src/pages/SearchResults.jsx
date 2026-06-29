@@ -4,66 +4,63 @@ import MovieCard from "../components/MovieCard";
 import tmdbAPI from "../services/tmdbAPI";
 import { PiMagnifyingGlass, PiFilmStrip } from "react-icons/pi";
 import GridSkeleton from "../components/skeletons/GridSkeleton";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get("q");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  
-        const pages = new Set([1]);
+  // Get the search query from the URL
+  const query = searchParams.get("q");
 
-        if (page <= 2) {
-          pages.add(2);
-          pages.add(3);
-        } else if (page >= totalPages - 1) {
-          pages.add(totalPages - 2);
-          pages.add(totalPages - 1);
-          pages.add(totalPages);
-        } else {
-          pages.add(page - 1);
-          pages.add(page);
-          pages.add(page + 1);
-        }
+  const lastItemRef = useInfiniteScroll(loading, page < totalPages, () =>
+    setPage((prev) => prev + 1),
+  );
 
-        const visiblePages = [...pages]
-          .filter((p) => p > 0 && p <= totalPages)
-          .sort((a, b) => a - b);
-
+  // Fetch search results whenever the query or page changes
   useEffect(() => {
     const searchMovies = async () => {
       if (!query) return;
 
-
       try {
         setLoading(true);
+
         const data = await tmdbAPI.searchMovies(query, page);
-        setResults((data.results || []).slice(0,18));
+
+        const movies = (data.results || []).slice(0, 18);
+
+        if (page === 1) {
+          setResults(movies);
+        } else {
+          setResults((prev) => [...prev, ...movies]);
+        }
+
         setTotalPages(Math.min(data.total_pages || 0, 500));
         setError(null);
       } catch (err) {
         setError(err.message);
-        console.error("Search error:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     searchMovies();
   }, [query, page]);
 
-
-
   // Reset page when query changes
   useEffect(() => {
+    setResults([]);
     setPage(1);
   }, [query]);
 
-if (loading) return <GridSkeleton/>
+  // Only show skeleton on the initial load
+  if (loading && results.length === 0) {
+    return <GridSkeleton />;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -94,42 +91,28 @@ if (loading) return <GridSkeleton/>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            {results.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+            {results.map((movie, index) => {
+              if (index === results.length - 1) {
+                return (
+                  <div ref={lastItemRef} key={movie.id}>
+                    <MovieCard movie={movie} />
+                  </div>
+                );
+              }
+
+              return <MovieCard key={movie.id} movie={movie} />;
+            })}
           </div>
 
-          {/* page numbers */}
-          <div className="flex justify-center mt-8 sm:mt-10 text-white px-2">
-            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
-              {visiblePages.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded cursor-pointer transition ${
-                    page === p
-                      ? "bg-purple-600"
-                      : "bg-gray-800 hover:bg-gray-700"
-                  }`}
-                >
-                  {p === 1 && page > 3 ? "First" : p}
-                </button>
-              ))}
-
-              {totalPages > 3 && page !== totalPages && (
-                <button
-                  onClick={() => setPage(totalPages)}
-                  className="px-4 py-2 rounded bg-gray-800 hover:bg-gray-700 cursor-pointer"
-                >
-                  Last
-                </button>
-              )}
+          {loading && results.length > 0 && (
+            <div className="flex justify-center py-8 text-white text-2xl">
+              Loading more...
             </div>
-          </div>
+          )}
         </>
       )}
     </div>
   );
-};
+};;;
 export default SearchResults;

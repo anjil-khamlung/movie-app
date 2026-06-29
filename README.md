@@ -19,7 +19,12 @@ A modern movie discovery application built with React, Vite, and Tailwind CSS, p
 - Tailwind CSS
 - TMDB API
 - JavaScript (ES6+)
-- Screenshots
 
+## Screenshots
+
+### Home page
 ![Home Page](./screenshots/Home.png)
+
+### Movie Details Page
 ![Movie Details](./screenshots/Details.png)
+

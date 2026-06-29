@@ -15,6 +15,33 @@ const Navbar = () => {
   const navigate = useNavigate();
   const timeoutRef = useRef(null);
 
+  const menuRef = useRef(null);
+
+  // Handle search form submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (!searchQuery.trim()) return;
+
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    setSearchQuery("");
+    setShowMobileMenu(false);
+  };
+
+  // Show desktop genres dropdown
+  const handleDesktopEnter = () => {
+    clearTimeout(timeoutRef.current);
+    setShowDesktopGenres(true);
+  };
+
+  // Hide desktop genres dropdown with a slight delay
+  const handleDesktopLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setShowDesktopGenres(false);
+    }, 200);
+  };
+
+  // Fetch movie genres on component mount
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -28,26 +55,20 @@ const Navbar = () => {
     fetchGenres();
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMobileMenu(false);
+      }
+    };
 
-    if (!searchQuery.trim()) return;
+    document.addEventListener("mousedown", handleClickOutside);
 
-    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    setSearchQuery("");
-    setShowMobileMenu(false);
-  };
-
-  const handleDesktopEnter = () => {
-    clearTimeout(timeoutRef.current);
-    setShowDesktopGenres(true);
-  };
-
-  const handleDesktopLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setShowDesktopGenres(false);
-    }, 200);
-  };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-linear-to-r from-purple-900 to-indigo-900 shadow-lg">
@@ -55,7 +76,10 @@ const Navbar = () => {
         {/* Desktop Navbar */}
         <div className="hidden md:flex items-center justify-between py-3">
           {/* Logo */}
-          <Link to="/">
+          <Link
+            to="/"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
             <img
               src={Mlogo}
               alt="MovieHub logo"
@@ -79,10 +103,7 @@ const Navbar = () => {
               </button>
 
               {showDesktopGenres && (
-                <div
-                  className="absolute left-0 top-full mt-2 bg-gray-800 text-white rounded-lg shadow-xl p-4 grid grid-cols-3 gap-3 min-w-105 "
-                
-                >
+                <div className="absolute left-0 top-full mt-2 bg-gray-800 text-white rounded-lg shadow-xl p-4 grid grid-cols-3 gap-3 min-w-105 ">
                   {genres.map((genre) => (
                     <button
                       key={genre.id}
@@ -180,7 +201,10 @@ const Navbar = () => {
 
           {/* Mobile Menu */}
           {showMobileMenu && (
-            <div className="mt-3 bg-gray-800 rounded-lg p-4 text-white">
+            <div
+              className="mt-3 bg-gray-800 rounded-lg p-4 text-white"
+              ref={menuRef}
+            >
               <div className="flex flex-col gap-3">
                 <Link to="/" onClick={() => setShowMobileMenu(false)}>
                   Home
@@ -223,6 +247,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+};;
 
 export default Navbar;
